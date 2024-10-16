@@ -1,10 +1,12 @@
+from datetime import datetime
 from app import db
 
 class User(db.Model):
     """
     Modelo que representa un usuario en el sistema.
 
-    Cada usuario tiene un correo electrónico, una contraseña encriptada, un nombre de usuario, un nombre completo, una biografía, una foto de perfil y una fecha de membresía.
+    Cada usuario tiene un correo electrónico, una contraseña encriptada, un nombre de usuario, 
+    un nombre, una biografía, una foto de perfil y una fecha de creación.
 
     Atributos:
         id_user (int): Identificador único del usuario (clave primaria).
@@ -26,8 +28,8 @@ class User(db.Model):
     username = db.Column(db.String(10), unique=True, nullable=False)  # Nombre de usuario, debe ser único y no nulo
     name = db.Column(db.String(50), nullable=False)  # Nombre completo del usuario
     bio = db.Column(db.String(300))  # Biografía del usuario
-    profile_pic = db.Column(db.LargeBinary)  # Foto de perfil del usuario
-    member_since = db.Column(db.Date)  # Fecha en que el usuario se unió al sistema
+    profile_pic = db.Column(db.String(300))  # Foto de perfil del usuario
+    member_since = db.Column(db.DateTime, default=datetime.now())  # Fecha en que el usuario se unió al sistema
 
     def __init__(self, email, password, username, name, bio=None, profile_pic=None, member_since=None):
         """
@@ -48,4 +50,4 @@ class User(db.Model):
         self.name = name
         self.bio = bio
         self.profile_pic = profile_pic
-        self.member_since = member_since
+        self.member_since = member_since or datetime.now()

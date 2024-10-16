@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.models.user import User
 from app import db
 
@@ -18,6 +19,31 @@ class UserService:
         db.session.add(new_user)
         db.session.commit()
         return new_user
+    
+    @staticmethod
+    def get_all_users():
+        """
+        Obtener todos los usuarios de la base de datos.
+        
+        Returns:
+            List[User]: Lista de todos los usuarios en la base de datos.
+        """
+        # Recuperar todos los registros de la tabla User
+        return User.query.all()
+
+    @staticmethod
+    def get_user_by_username(username):
+        """
+        Obtener un usuario por su nombre de usuario.
+        
+        Args:
+            username (str): Nombre de usuario a buscar.
+        
+        Returns:
+            User: El usuario encontrado o None si no existe.
+        """
+        # Filtrar usuarios por su nombre de usuario (username)
+        return User.query.filter_by(username=username).first()
 
     @staticmethod
     def update_user(user_id, email=None, password=None, username=None, name=None, bio=None, profile_pic=None):
