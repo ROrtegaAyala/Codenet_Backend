@@ -7,10 +7,10 @@ user_ns = Namespace('users', description='Operaciones relacionadas con los usuar
 
 # Definir el modelo de usuario para la documentación de Swagger
 user_model = user_ns.model('User', {
-    'email': fields.String(required=True, description='Correo electrónico del usuario'),
-    'password': fields.String(required=True, description='Contraseña del usuario'),
-    'username': fields.String(required=True, description='Nombre de usuario'),
-    'name': fields.String(required=True, description='Nombre completo del usuario'),
+    'email': fields.String(description='Correo electrónico del usuario'),
+    'password': fields.String(description='Contraseña del usuario'),
+    'username': fields.String(description='Nombre de usuario de identificación'),
+    'name': fields.String(description='Nombre del usuario'),
     'bio': fields.String(description='Biografía del usuario'),
     'profile_pic': fields.String(description='Foto de perfil del usuario'),
     'member_since': fields.String(description='Fecha en que el usuario se unió al sistema'),
@@ -41,6 +41,13 @@ class UserResource(Resource):
         - 400: Si ocurre un error durante la creación del usuario.
         """
         data = request.get_json()  # Obtiene los datos en formato JSON del cuerpo de la solicitud
+
+        # Validación de campos requeridos para creación
+        required_fields = ['email', 'username', 'password']
+        for field in required_fields:
+            if field not in data: 
+                return jsonify({'error': f'El campo {field} es requerido'}), 400
+
         user = UserService.create_user(data['email'], data['password'], data['username'],
                                        data['name'], data.get('bio'), data.get('profile_pic'), data.get('member_since'))
         # Usamos jsonify para asegurarnos de que la respuesta siga el formato JSON válido.

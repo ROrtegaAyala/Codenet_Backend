@@ -1,6 +1,6 @@
 from datetime import datetime
 from app.models.user import User
-from app import db
+from app import db, bcrypt
 
 class UserService:
     @staticmethod
@@ -8,7 +8,7 @@ class UserService:
         # Crear una nueva instancia del usuario con los datos proporcionados
         new_user = User(
             email=email,
-            password=password,
+            password=bcrypt.generate_password_hash(password).decode('utf-8'),
             username=username,
             name=name,
             bio=bio,
@@ -46,36 +46,42 @@ class UserService:
         return User.query.filter_by(username=username).first()
 
     @staticmethod
-    def update_user(user_id, email=None, password=None, username=None, name=None, bio=None, profile_pic=None):
+    def update_user(username, newdata):
         # Buscar el usuario por su ID
-        user = User.query.get(user_id)
+        user = UserService.get_user_by_username(username)
         if not user:
-            return None
+            # Si no se encuentra el usuario, lanzar una excepción
+            raise ValueError('User not found')
 
         # Actualizar los campos del usuario solo si se proporcionan nuevos valores
-        if email:
-            user.email = email
-        if password:
-            user.password = password
-        if username:
-            user.username = username
-        if name:
-            user.name = name
-        if bio:
-            user.bio = bio
-        if profile_pic:
-            user.profile_pic = profile_pic
+        if 'username' in newdata:
+            existing_user = User.query.filter_by(username=newdata['username']).first()
+            if existing_user:
+                # Si se encuentra un usuario existente, lanzar una excepción
+                raise ValueError('Username already exists')
+            user.username = newdata['username']
+
+        if 'email' in newdata:
+            existing_email = User.query.filter_by(email=newdata['email']).first()
+            if existing_email:
+                # Si se encuentra un usuario existente, lanzar una excepción
+                raise ValueError('Email already linked to an account')
+            user.email = newdata['email']
+
+        if 'password' in newdata:
+            user.password = bcrypt.generate_password_hash(newdata['password']).decode('utf-8')
 
         # Confirmar los cambios en la base de datos
         db.session.commit()
         return user
 
     @staticmethod
-    def delete_user(user_id):
+    def delete_user(username):
         # Buscar el usuario por su ID
-        user = User.query.get(user_id)
+        user = UserService.get_user_by_username(username)
         if not user:
-            return False
+            # Si no se encuentra el usuario, lanzar una excepción
+            raise ValueError('User not found')
 
         # Eliminar el usuario de la base de datos y confirmar los cambios
         db.session.delete(user)
