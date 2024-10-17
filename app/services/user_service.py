@@ -1,20 +1,18 @@
 from datetime import datetime
 from app.models.user import User
+from app.models.entry import Entry
 from app import db, bcrypt
 
 class UserService:
     @staticmethod
-    def create_user(email, password, username, name, bio=None, profile_pic=None, member_since=None):
+    def create_user(data):
+        if User.query.filter_by(email=data['email']).first() or User.query.filter_by(username=data['username']).first():
+            raise ValueError('Email or username already in use')
+        
         # Crear una nueva instancia del usuario con los datos proporcionados
-        new_user = User(
-            email=email,
-            password=bcrypt.generate_password_hash(password).decode('utf-8'),
-            username=username,
-            name=name,
-            bio=bio,
-            profile_pic=profile_pic,
-            member_since=member_since
-        )
+        user_data = {**data, 'password': bcrypt.generate_password_hash(data['password']).decode('utf-8')}
+        new_user = User(**user_data)
+
         # Agregar el nuevo usuario a la sesión de la base de datos y confirmar los cambios
         db.session.add(new_user)
         db.session.commit()
@@ -59,17 +57,19 @@ class UserService:
             if existing_user:
                 # Si se encuentra un usuario existente, lanzar una excepción
                 raise ValueError('Username already exists')
-            user.username = newdata['username']
 
         if 'email' in newdata:
             existing_email = User.query.filter_by(email=newdata['email']).first()
             if existing_email:
                 # Si se encuentra un usuario existente, lanzar una excepción
                 raise ValueError('Email already linked to an account')
-            user.email = newdata['email']
 
         if 'password' in newdata:
             user.password = bcrypt.generate_password_hash(newdata['password']).decode('utf-8')
+
+        for key, value in newdata.items():
+            if hasattr(user, key):
+                setattr(user, key, value)
 
         # Confirmar los cambios en la base de datos
         db.session.commit()
