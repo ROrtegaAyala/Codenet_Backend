@@ -35,10 +35,10 @@ class Entry(db.Model):
     source_file = db.Column(db.String(100)) #Archivo de código fuente
     github_link = db.Column(db.String(100)) #Link al repositorio de github
     created_at = db.Column(db.DateTime, default=datetime.now()) # Fecha de creación de la entrada
-    id_user = db.Column(db.Integer, db.ForeignKey('users.id_user'), nullable=False) # Clave foránea hacia la tabla "users"
+    id_user = db.Column(db.Integer, db.ForeignKey('users.id_user', ondelete='CASCADE'), nullable=False) # Clave foránea hacia la tabla "users"
 
     # Relación con el modelo User
-    user = db.relationship('User', backref='entries') # Define la relación con el modelo User y permite acceso inverso desde User a Entry
+    # user = db.relationship('User', backref='entries') # Define la relación con el modelo User y permite acceso inverso desde User a Entry
 
     def __init__(self, **kwargs):
         """

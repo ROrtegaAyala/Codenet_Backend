@@ -31,7 +31,10 @@ class User(db.Model):
     profile_pic = db.Column(db.String(300))  # Foto de perfil del usuario
     member_since = db.Column(db.DateTime, default=datetime.now())  # Fecha en que el usuario se unió al sistema
 
-    def __init__(self, email, password, username, name, bio=None, profile_pic=None, member_since=None):
+    # Relación con el modelo entry (para habilitar eliminación en cascada)
+    entries = db.relationship('Entry', backref='user', cascade='all, delete-orphan') #Configuración para eliminación en cascada
+
+    def __init__(self, **kwargs):
         """
         Constructor de la clase User.
 
@@ -44,10 +47,8 @@ class User(db.Model):
             profile_pic (blob, opcional): La foto de perfil del usuario.
             member_since (date, opcional): La fecha de membresía del usuario.
         """
-        self.email = email
-        self.password = password
-        self.username = username
-        self.name = name
-        self.bio = bio
-        self.profile_pic = profile_pic
-        self.member_since = member_since or datetime.now()
+        for key, value in kwargs.items():
+            if key == 'member_since':
+                setattr(self, key, datetime.now())
+            else:
+                setattr(self, key, value) 
