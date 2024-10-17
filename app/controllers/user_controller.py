@@ -69,7 +69,7 @@ class UserResource(Resource):
 
 
 @user_ns.route('/<username>')
-@user_ns.param('username', 'El nombre del usuario')
+@user_ns.param('username', 'El nombre de usuario')
 class UserDetailResource(Resource):
     @user_ns.doc('delete_user')
     def delete(self, username):
